@@ -69,5 +69,5 @@ assert_eq!(Some(&8), vec.get_current().value());
 
 ## TODO
 
-* [ ] Panickable feature
-* [ ] 
+* [ ] Feature : Panickable operation feature rather than bool return.
+- This enables easier error handling with cost of possible panicking behaviour
