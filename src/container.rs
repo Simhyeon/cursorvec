@@ -60,6 +60,7 @@ impl<T> CursorVec<T> {
         self
     }
 
+    /// Set cursor rotatable
     pub fn rotatable(mut self, rotatable: bool) -> Self {
         self.cursor.set_rotation(rotatable);
         self
@@ -214,6 +215,11 @@ impl<T> CursorVec<T> {
     }
 
     /// Move cursor to next
+    ///
+    /// # Return value
+    ///
+    /// - True move is success
+    /// - False move is failure
     pub fn move_next(&mut self) -> bool {
         if self.is_empty_container() {
             return false;
@@ -223,6 +229,11 @@ impl<T> CursorVec<T> {
     }
 
     /// Move cursor to previous
+    ///
+    /// # Return value
+    ///
+    /// - True move is success
+    /// - False move is failure
     pub fn move_prev(&mut self) -> bool {
         if self.is_empty_container() {
             return false;
@@ -243,6 +254,11 @@ impl<T> CursorVec<T> {
     }
 
     /// Set cursor with manual index
+    ///
+    /// # Return value
+    ///
+    /// - True if assign is success
+    /// - False if assign is failure
     pub fn set_cursor(&mut self, cursor: usize) -> bool {
         self.cursor.set_value(cursor)
     }
