@@ -66,8 +66,3 @@ vec.modify(|cont| cont.retain(|num| *num % 2 == 0));
 assert_eq!(Some(3), vec.get_cursor());
 assert_eq!(Some(&8), vec.get_current().value());
 ```
-
-## TODO
-
-* [ ] Feature : Panickable operation feature rather than bool return.
-- This enables easier error handling with cost of possible panicking behaviour
