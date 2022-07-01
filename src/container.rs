@@ -46,6 +46,21 @@ impl<T> Default for CursorVec<T> {
 
 impl<T> CursorVec<T> {
     /// Constructor
+    ///
+    /// Combine with builder methods to configure container with single method chains.
+    ///
+    /// # Usage
+    /// ```rust
+    /// use cursorvec::CursorVec;
+    ///
+    /// let mut vec = CursorVec::new()
+    ///     .rotatable(true) // Set cursor rotatable
+    ///     .with_container(vec![1,2,3,4,5,]); // Assign container
+    ///
+    /// // You can set properties later
+    /// vec.set_rotatable(false);
+    /// vec.set_container(vec![10,11,23]);
+    /// ```
     pub fn new() -> Self {
         Self {
             vector: vec![],
@@ -53,7 +68,7 @@ impl<T> CursorVec<T> {
         }
     }
 
-    /// Set with container
+    /// Build cursorvec with container
     ///
     /// This gets argument as vector not an array because container type doesn't require copy trait
     pub fn with_container(mut self, vector: Vec<T>) -> Self {
@@ -62,10 +77,15 @@ impl<T> CursorVec<T> {
         self
     }
 
-    /// Set cursor rotatable
+    /// Build cursorvec with rotatable cursor
     pub fn rotatable(mut self, rotatable: bool) -> Self {
         self.cursor.set_rotation(rotatable);
         self
+    }
+
+    /// Set cursor rotatable
+    pub fn set_rotatable(&mut self, rotatable: bool) {
+        self.cursor.set_rotation(rotatable);
     }
 
     /// Set container

@@ -100,6 +100,21 @@ impl<'container, T> CursorState<'container, T> {
     /// Try get value from cursor state
     ///
     /// This will return none if cursor is in invalid state.
+    ///
+    /// ```rust
+    /// use cursorvec::{CursorVec, CursorState};
+    ///
+    /// let mut vec = CursorVec::new().with_container(vec![1,2,3]);
+    /// vec.set_cursor(2);
+    ///
+    /// // Valid state is evalued as Some(..)
+    /// assert_eq!(CursorState::Valid(&3), vec.get_current());
+    /// assert_eq!(Some(&3), vec.get_current().value());
+    ///
+    /// // Invalid state is evalued as None
+    /// assert_eq!(CursorState::MaxOut, vec.move_next_and_get());
+    /// assert_eq!(None, vec.move_next_and_get().value());
+    /// ```
     pub fn value(&self) -> Option<&T> {
         if let Self::Valid(val) = self {
             Some(*val)

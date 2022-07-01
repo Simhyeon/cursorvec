@@ -4,12 +4,12 @@
 //!
 //! Since cursorvec redirects deref trait to inner container, std lib's vector methods are also
 //! applicable to cursorvec. However cursor will not be automatically updated, thus cursor might
-//! not be in range bounds. In such case call [update_cursor](CursorVec::update_cursor) manually
+//! not be in range bounds. In such case, call [update_cursor](CursorVec::update_cursor) manually
 //! after or bind the methods inside cursorvec's [modify](CursorVec::modify) method.
 //!
 //! # Operation behaviours
 //!
-//! By default, cursorvec's operations never fails but return boolean or [cursorstate
+//! By default, cursorvec's operations never fails but return [boolean](OpResult) or [cursorstate
 //! enum](CursorState). You can change this behaviour by enabling ```strict``` feature.
 //!
 //! ```toml
