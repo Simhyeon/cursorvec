@@ -1,6 +1,6 @@
 [package]
 name = "cursorvec"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 keywords = ["vec","cursor"]
@@ -9,3 +9,6 @@ description = "Cursored vector container"
 homepage = "https://github.com/simhyeon/cursorvec"
 repository = "https://github.com/simhyeon/cursorvec"
 readme = "README.md"
+
+[features]
+strict = []

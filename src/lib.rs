@@ -1,16 +1,32 @@
-//! cursorvec, vector container with in-built cursor
+//! cursorvec, vector container with built-in cursor
 //!
 //! You can move cursor next and previous with methods, which always guarantee range bounds.
 //!
-//! Since cursorvec redirects deref trait to inner container, std lib's vector methods are also applicable to cursorvec. However cursor will not be automatically updated, thus cursor might not be in range bounds. In such case call ```update_cursor``` manually after or bind the methods inside cursorvec's ```modify``` method.
+//! Since cursorvec redirects deref trait to inner container, std lib's vector methods are also
+//! applicable to cursorvec. However cursor will not be automatically updated, thus cursor might
+//! not be in range bounds. In such case call [update_cursor](CursorVec::update_cursor) manually
+//! after or bind the methods inside cursorvec's [modify](CursorVec::modify) method.
+//!
+//! # Operation behaviours
+//!
+//! By default, cursorvec's operations never fails but return boolean or [cursorstate
+//! enum](CursorState). You can change this behaviour by enabling ```strict``` feature.
+//!
+//! ```toml
+//! [dependency]
+//! cursorvec = { version = "*", features = ["strict"] }
+//! ```
+//!
+//! If strict feature is enabled, previous operations that returned boolean value will return a
+//! result with error messages. User can redirect those results and handle errors more precisely.
 //!
 //! # Usage
 //!
 //! ```rust
 //! use cursorvec::{CursorVec, CursorState};
 //!
-//! let mut vec =
-//!     CursorVec::new().with_container(vec!["first", "second", "third", "fourth", "fifth"]);
+//! let mut vec = CursorVec::new()
+//!     .with_container(vec!["first", "second", "third", "fourth", "fifth"]);
 //!
 //! // Move cursor to next and get cursor's value
 //! assert_eq!(Some(&"first"), vec.get_current().value());
@@ -68,7 +84,9 @@
 //! ```
 mod container;
 mod cursor;
+mod result;
 mod test;
 
 pub use container::CursorVec;
 pub use cursor::CursorState;
+pub use result::OpResult;

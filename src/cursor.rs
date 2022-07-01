@@ -1,3 +1,6 @@
+use crate::result;
+use crate::OpResult;
+
 /// Cursor that points value
 #[derive(Debug, PartialEq)]
 pub(crate) struct Cursor {
@@ -23,12 +26,12 @@ impl Cursor {
         self.index
     }
 
-    pub fn set_value(&mut self, value: usize) -> bool {
+    pub fn set_value(&mut self, value: usize) -> OpResult {
         if value > self.capacity {
-            false
+            result::error("Cursor out of range")
         } else {
             self.index = value;
-            true
+            result::ok()
         }
     }
 
@@ -39,37 +42,37 @@ impl Cursor {
         }
     }
 
-    pub fn increase(&mut self) -> bool {
+    pub fn increase(&mut self) -> OpResult {
         if self.capacity == 0 {
-            return false;
+            return result::error("Empty container");
         };
         if self.index == self.capacity - 1 {
             if self.rotation {
                 self.index = 0;
-                true
+                result::ok()
             } else {
-                false
+                result::error("Cursor out of range")
             }
         } else {
             self.index += 1;
-            true
+            result::ok()
         }
     }
 
-    pub fn decrease(&mut self) -> bool {
+    pub fn decrease(&mut self) -> OpResult {
         if self.capacity == 0 {
-            return false;
+            return result::error("Empty container");
         };
         if self.index == 0 {
             if self.rotation {
                 self.index = self.capacity - 1;
-                true
+                result::ok()
             } else {
-                false
+                result::error("Cursor out of range")
             }
         } else {
             self.index -= 1;
-            true
+            result::ok()
         }
     }
 }
@@ -79,10 +82,17 @@ impl Cursor {
 /// You can convert cursor state into an option with "value" method
 #[derive(Debug, PartialEq)]
 pub enum CursorState<'container, T> {
+    /// Cursor cannot move previous because it reached minimal index (0)
     MinOut,
+    /// Cursor cannot point anything because container is empty or cursor's information was not
+    /// updated
     EmptyContainer,
+    /// Cursor is in valid position. Valid cursor state refers a container value
     Valid(&'container T),
+    /// Cursor is not in container's range. This is caused by container's manual modification
+    /// without update
     OutOfRange,
+    /// Cursor cannot move next because it reached maximal index (container.len() - 1)
     MaxOut,
 }
 

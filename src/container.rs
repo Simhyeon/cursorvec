@@ -1,4 +1,5 @@
-use crate::{cursor::Cursor, cursor::CursorState};
+use crate::result;
+use crate::{cursor::Cursor, cursor::CursorState, OpResult};
 use std::ops::{Deref, DerefMut};
 
 /// Vector container with inner cursor variable
@@ -15,8 +16,9 @@ use std::ops::{Deref, DerefMut};
 /// let mut vec = CursorVec::new()
 ///     .with_container(vec!["first", "second", "third", "fourth", "fifth"]);
 ///
-/// assert_eq!(Some("first"), vec.get_current().value());
+/// assert_eq!(Some(&"first"), vec.get_current().value());
 /// ```
+
 #[derive(Debug)]
 pub struct CursorVec<T> {
     vector: Vec<T>,
@@ -75,12 +77,48 @@ impl<T> CursorVec<T> {
     /// Modify inner container with given closure
     ///
     /// This method automatically calls update_cursor after every closure call.
+    ///
+    /// # Usage
+    ///
+    /// ```rust
+    /// use cursorvec::CursorVec;
+    ///
+    /// let mut vec = CursorVec::new().with_container(vec![1,2,3]);
+    /// vec.set_cursor(2);
+    ///
+    /// // Removes 2 and 3 from the vector and automatically update cursor bounds
+    /// vec.modify(|cont| {cont.drain(1..);});
+    ///
+    /// // Now cursor is set to 0
+    /// assert_eq!(Some(0), vec.get_cursor());
+    /// ```
     pub fn modify<F: Fn(&mut Vec<T>)>(&mut self, f: F) {
         f(&mut self.vector);
         self.update_cursor();
     }
 
     /// Update cursor's state
+    ///
+    /// This is usually not necessary but mostly useful when user has modified inner container's
+    /// values that possibly changes cursors range bounds.
+    ///
+    /// # Usage
+    ///
+    ///
+    /// ```rust
+    /// use cursorvec::CursorVec;
+    ///
+    /// let mut vec = CursorVec::new().with_container(vec![1,2,3,4,5,6]);
+    /// vec.set_cursor(vec.len() - 1);
+    ///
+    /// // Removes odd numbers
+    /// vec.retain(|num| num % 2 == 0);
+    /// // Update cursor bounds
+    /// vec.update_cursor();
+    ///
+    /// // Now cursor is set to 2
+    /// assert_eq!(Some(2), vec.get_cursor());
+    /// ```
     pub fn update_cursor(&mut self) {
         self.cursor.set_capacity(self.vector.len());
     }
@@ -90,7 +128,7 @@ impl<T> CursorVec<T> {
         if self.is_empty_container() {
             return CursorState::EmptyContainer;
         }
-        if !self.cursor.increase() {
+        if !result::is_true(self.cursor.increase()) {
             return CursorState::MaxOut;
         }
         match self.get_cursor_value() {
@@ -103,6 +141,7 @@ impl<T> CursorVec<T> {
     ///
     /// If the container is empty it returns none
     /// If the state is maxout, this will return valid cursor's value
+    #[allow(unused_must_use)]
     pub fn move_next_and_get_always(&mut self) -> Option<&T> {
         if self.is_empty_container() {
             return None;
@@ -117,7 +156,7 @@ impl<T> CursorVec<T> {
             return CursorState::EmptyContainer;
         }
         for _ in 0..amount {
-            if !self.cursor.increase() {
+            if !result::is_true(self.cursor.increase()) {
                 return CursorState::MaxOut;
             }
         }
@@ -136,7 +175,7 @@ impl<T> CursorVec<T> {
             return None;
         }
         for _ in 0..amount {
-            if !self.cursor.increase() {
+            if !result::is_true(self.cursor.increase()) {
                 // Early return
                 return self.get_cursor_value();
             }
@@ -149,7 +188,7 @@ impl<T> CursorVec<T> {
         if self.is_empty_container() {
             return CursorState::EmptyContainer;
         }
-        if !self.cursor.decrease() {
+        if !result::is_true(self.cursor.decrease()) {
             return CursorState::MinOut;
         }
         match self.get_cursor_value() {
@@ -162,6 +201,7 @@ impl<T> CursorVec<T> {
     ///
     /// If the container is empty it returns none
     /// If the state is minout, this will return valid cursor's value
+    #[allow(unused_must_use)]
     pub fn move_prev_and_get_always(&mut self) -> Option<&T> {
         if self.is_empty_container() {
             return None;
@@ -176,7 +216,7 @@ impl<T> CursorVec<T> {
             return CursorState::EmptyContainer;
         }
         for _ in 0..amount {
-            if !self.cursor.decrease() {
+            if !result::is_true(self.cursor.decrease()) {
                 return CursorState::MinOut;
             }
         }
@@ -195,7 +235,7 @@ impl<T> CursorVec<T> {
             return None;
         }
         for _ in 0..amount {
-            if !self.cursor.decrease() {
+            if !result::is_true(self.cursor.decrease()) {
                 // Early return
                 return self.get_cursor_value();
             }
@@ -215,28 +255,18 @@ impl<T> CursorVec<T> {
     }
 
     /// Move cursor to next
-    ///
-    /// # Return value
-    ///
-    /// - True move is success
-    /// - False move is failure
-    pub fn move_next(&mut self) -> bool {
+    pub fn move_next(&mut self) -> OpResult {
         if self.is_empty_container() {
-            return false;
+            return result::error("empty container");
         }
 
         self.cursor.increase()
     }
 
     /// Move cursor to previous
-    ///
-    /// # Return value
-    ///
-    /// - True move is success
-    /// - False move is failure
-    pub fn move_prev(&mut self) -> bool {
+    pub fn move_prev(&mut self) -> OpResult {
         if self.is_empty_container() {
-            return false;
+            return result::error("empty container");
         }
         self.cursor.decrease()
     }
@@ -254,12 +284,7 @@ impl<T> CursorVec<T> {
     }
 
     /// Set cursor with manual index
-    ///
-    /// # Return value
-    ///
-    /// - True if assign is success
-    /// - False if assign is failure
-    pub fn set_cursor(&mut self, cursor: usize) -> bool {
+    pub fn set_cursor(&mut self, cursor: usize) -> OpResult {
         self.cursor.set_value(cursor)
     }
     // </Manual> Methods
